@@ -4,8 +4,8 @@ from datetime import datetime
 import json
 import time
 
-Ymd = time.strftime("%Y%m%d")
-ymd = time.strftime("%y%m%d")
+yyyymd = time.strftime("%Y%m%d")
+yymmdd = time.strftime("%y%m%d")
 fractionalNow = datetime.now().strftime("%Y%m%d%H%M%S.%f")[:-4]
 
 class DataField:
@@ -20,7 +20,6 @@ class DataField:
 			self.indicator2 = indicator2
 
 			self.subfields = []
-
 
 class Subfield:
 	def __init__(self,subfieldCharacter,value):
@@ -96,7 +95,6 @@ class OhOhEight:
 class OhOhSix:
 	def __init__(self):
 		pass
-
 
 
 class ItemBytes:

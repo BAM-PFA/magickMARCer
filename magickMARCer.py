@@ -35,6 +35,24 @@ class Record:
 					]:
 					addedEntry.subfields.append(x)
 				self.dataFields.append(addedEntry)
+		speakers = self.fieldedData['Speakers'].split('|')
+		if speakers != ['']:
+			titleProper = fields.DataField('245','0','0')
+			for x in [
+				fields.Subfield(
+					'a',
+					"[{}. Speaking at the Pacific Film Archive {}.] /".format(
+						', '.join(speakers),
+						self.yyyymmdd[4:]+\
+							"/"+self.yyyymmdd[4:6]+\
+							"/"+self.yyyymmdd[6:8]
+						)
+					),
+				fields.Subfield(
+					'c',
+					"UC Berkeley Art Museum and Pacific Film Archive."
+					)
+				]
 
 	def parse_film_title_subjects(self):
 		titles = self.fieldedData['FilmTitles'].split('|')
@@ -64,27 +82,15 @@ class Record:
 				recDate.subfields.append(x)
 			self.dataFields.append(recDate)
 
-	def add_collection_defaults(self):
-		#$as$bz$du$eu$fn$gn$hn$in$jn$kn$ln$me$nz
-		ohOhSeven = fields.DataField('007','','')
-		for x in [
-			fields.Subfield('a','s'),
-			fields.Subfield('b','z'),
-			fields.Subfield('d','u'),
-			fields.Subfield('e','u'),
-			fields.Subfield('f','n'),
-			fields.Subfield('g','n'),
-			fields.Subfield('h','n'),
-			fields.Subfield('i','n'),
-			fields.Subfield('j','n'),
-			fields.Subfield('k','n'),
-			fields.Subfield('l','n'),
-			fields.Subfield('m','e'),
-			fields.Subfield('n','z')
-			]:
-			ohOhSeven.subfields.append(x)
+	def parse_stereo_mono(self):
+		try:
+			self.MonoStereo = self.fieldedData['channels']
+		except:
+			self.MonoStereo = 'unknown'
+		if not self.MonoStereo:
+			self.MonoStereo = 'unknown'
 
-		self.dataFields.append(ohOhSeven)
+	
 
 def main():
 	collectionJSON = handlers.main()
