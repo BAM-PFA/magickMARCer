@@ -12,14 +12,14 @@ MARCmapper = {
 		}
 	},
 	"DigitizationNotes":{
-		"tag":"500"
+		"tag":"500",
 		"status":None,
 		"subfields":{
 			"a":"value"
 		}
 	},
 	"recordingEventDescription":{
-		"tag":"520"
+		"tag":"520",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -27,7 +27,7 @@ MARCmapper = {
 		}
 	},
 	"recordingEventRecordingNotes":{
-		"tag":"500"
+		"tag":"500",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -35,7 +35,7 @@ MARCmapper = {
 		}
 	},
 	"recordingEventTitle":{
-		"tag":"500"
+		"tag":"500",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -43,7 +43,7 @@ MARCmapper = {
 		}
 	},
 	"recordingLocation":{
-		"tag":"500"
+		"tag":"500",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -51,16 +51,15 @@ MARCmapper = {
 		}
 	},
 	"recordingPermissions":{
-		"tag":"540"
+		"tag":"540",
 		"status":None,
 		"subfields":{
 			"a":"value",
 			"c":"Speaker release form"
 		}
 	},
-	,
 	"recordingTapeNumber":{
-		"tag":"540"
+		"tag":"540",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -68,7 +67,7 @@ MARCmapper = {
 		}
 	},
 	"FilmTitle":{
-		"tag":"630"
+		"tag":"630",
 		"status":None,
 		"subfields":{
 			"a":"value",
@@ -76,72 +75,30 @@ MARCmapper = {
 		}
 	},
 	"Speaker":{
-		"tag":"700"
+		"tag":"700",
 		"status":None,
 		"subfields":{
 			"a":"value",
-			"suffix":", "
+			"suffix":", ",
 			"e":"speaker"
 		}
 	},
+	"duration":{
+		"tag":"306",
+		"status":"rawduration",
+		"subfields":{
+			"":""
+		}
+	},
 	"DigitizationNotes":{
-		"tag":"540"
+		"tag":"540",
 		"status":None,
 		"subfields":{
 			"":""
 		}
 	},
 	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540"
+		"tag":"540",
 		"status":None,
 		"subfields":{
 			"":""

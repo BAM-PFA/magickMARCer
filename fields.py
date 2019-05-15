@@ -12,8 +12,8 @@ class DataField:
 		def __init__(
 			self,
 			tag,
-			indicator1,
-			indicator2
+			indicator1='',
+			indicator2=''
 			):
 			self.tag = tag
 			self.indicator1 = indicator1
