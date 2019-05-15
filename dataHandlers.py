@@ -37,7 +37,7 @@ def main():
 	dataPath = get_data_csv()
 	collectionJSON = rows_to_json(dataPath)
 
-	print(collectionJSON)
+	# print(collectionJSON)
 	return collectionJSON
 
 if __name__ == "__main__":

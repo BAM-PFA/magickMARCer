@@ -6,8 +6,8 @@ import time
 import uuid
 
 import fields
-import handlers
-from MARCmapper import MARCmapper
+import dataHandlers
+import MARCmapper
 
 class Record:
 	'''
@@ -23,87 +23,33 @@ class Record:
 			self.recordUUID = k
 
 		self.dataFields = []
-
-	def parse_speaker_names(self):
-		namesLNFN = self.fieldedData['lnfn'].split('|')
-		if namesLNFN != ['']:
-			for name in namesLNFN:
-				addedEntry = fields.DataField('700','1','',)
-				for x in [
-					fields.Subfield('a',name),
-					fields.Subfield('e','speaker')
-					]:
-					addedEntry.subfields.append(x)
-				self.dataFields.append(addedEntry)
-		speakers = self.fieldedData['Speakers'].split('|')
-		if speakers != ['']:
-			titleProper = fields.DataField('245','0','0')
-			for x in [
-				fields.Subfield(
-					'a',
-					"[{}. Speaking at the Pacific Film Archive {}.] /".format(
-						', '.join(speakers),
-						self.yyyymmdd[4:]+\
-							"/"+self.yyyymmdd[4:6]+\
-							"/"+self.yyyymmdd[6:8]
-						)
-					),
-				fields.Subfield(
-					'c',
-					"UC Berkeley Art Museum and Pacific Film Archive."
-					)
-				]
-
-	def parse_film_title_subjects(self):
-		titles = self.fieldedData['FilmTitles'].split('|')
-		if titles != ['']:
-			for title in titles:
-				subj = fields.DataField('630','','4')
-				subj.subfields.append(
-					fields.Subfield('a',title+" (Motion Picture)")
-					)
-				self.dataFields.append(subj)
-
-	def parse_recording_date(self):
-		date = self.fieldedData['recordingDate']
-		try:
-			date = datetime.strptime(date,'%a %b %d %H:%M:%S PST %Y')
-			yyyymmdd = datetime.strftime(date,'%Y%m%d')
-		except:
-			yyyymmdd = date
-		self.yyyymmdd = yyyymmdd
-		if len(self.yyyymmdd) == 8:
-			recDate = fields.DataField('033','0','0')
-			for x in [
-				fields.Subfield('a',self.yyyymmdd),
-				fields.Subfield('b','4360'),
-				fields.Subfield('c','B5')
-				]:
-				recDate.subfields.append(x)
-			self.dataFields.append(recDate)
-
-	def parse_stereo_mono(self):
-		try:
-			self.MonoStereo = self.fieldedData['channels']
-		except:
-			self.MonoStereo = 'unknown'
-		if not self.MonoStereo:
-			self.MonoStereo = 'unknown'
-
-	
+		self.customProperties = {
+			# defining some properties specific to our project here
+			'MonoStereo':None,
+			'yyyymmdd':None,
+			'duration':None
+		}
+		
+class Collection:
+	'''
+	Just a list of Record objects
+	'''
+	def __init__(self):
+		self.records = []
 
 def main():
-	collectionJSON = handlers.main()
+	collectionJSON = dataHandlers.main()
 
-	# counter = 0
-	# while counter < 3:
-	# 	for x in collectionJSON:
-	# 		print(x)
+	myCollection = Collection()
 
 	for recordUUID,data in collectionJSON.items():
 		onerecord = Record(data)
-		onerecord.parse_speaker_names()
-		print(onerecord.dataFields)
+		MARCmapper.main(onerecord)
+
+		myCollection.records.append(onerecord)
+
+	for arecord in myCollection.records:
+		print(arecord.dataFields)
 
 if __name__ == "__main__":
 	main()
