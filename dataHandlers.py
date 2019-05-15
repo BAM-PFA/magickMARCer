@@ -28,7 +28,9 @@ def rows_to_json(dataPath):
 		# print(record)
 		recordUUID = str(uuid.uuid4())
 		collectionJSON[recordUUID] = {}
+		# print(collectionJSON[recordUUID])
 		for column in headers:
+			# print(record[headers.index(column)])
 			collectionJSON[recordUUID][column] = record[headers.index(column)]
 
 	return collectionJSON
