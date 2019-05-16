@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import datetime
 import fields
 
 '''
@@ -23,102 +24,128 @@ MARCmapper = {
 	"recordingDate":{
 		"tag":None,
 		"status":"rawdate",
-		"subfields":{
-			"":""
-		}
+		"subfields":[],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"DigitizationNotes":{
 		"tag":"500",
 		"status":None,
-		"subfields":{
-			"a":"value"
-		}
+		"subfields":[
+			{
+				"a":"value"
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"recordingEventDescription":{
 		"tag":"520",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"prepend":"Description of the event:",
-		}
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Description of the event: "
+			}
+		],
+		"indicator1":"8",
+		"indicator2":" "
 	},
 	"recordingEventRecordingNotes":{
 		"tag":"500",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"prepend":"Notes about the original analog recording:"
-		}
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Notes about the original analog recording: "
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"recordingEventTitle":{
 		"tag":"500",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"prepend":"Title of event:"
-		}
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Title of event: "
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"recordingLocation":{
 		"tag":"500",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"prepend":"Location of recording:"
-		}
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Location of recording: "
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"recordingPermissions":{
 		"tag":"540",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"c":"Speaker release form"
-		}
+		"subfields":[
+			{
+				"a":"value"
+			},
+			{
+				"c":"Speaker release form."
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"recordingTapeNumber":{
-		"tag":"540",
+		"tag":"500",
 		"status":None,
-		"subfields":{
-			"a":"value",
-			"prepend":"Original audiocassette tape number:"
-		}
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Original audiocassette tape number: "
+			}
+		],
+		"indicator1":" ",
+		"indicator2":" "
 	},
 	"FilmTitle":{
 		"tag":"630",
-		"status":None,
-		"subfields":{
-			"a":"value",
-			"suffix":"(Motion Piction)"
-		}
+		"status":"Parsed specifically in its own function",
+		"subfields":[
+			{
+				"a":"value",
+				"suffix":"(Motion Piction)"
+			}
+		],
+		"indicator1":" ",
+		"indicator2":"4"
 	},
 	"Speaker":{
 		"tag":"700",
-		"status":None,
-		"subfields":{
-			"a":"value",
-			"suffix":", ",
-			"e":"speaker"
-		}
+		"status":"Parsed specifically in its own function",
+		"subfields":[
+			{
+				"a":"value",
+				"suffix":", "
+			},
+			{
+				"e":"speaker"
+			}
+		],
+		"indicator1":"1",
+		"indicator2":" "
 	},
 	"duration":{
 		"tag":"306",
 		"status":"rawduration",
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540",
-		"status":None,
-		"subfields":{
-			"":""
-		}
-	},
-	"DigitizationNotes":{
-		"tag":"540",
-		"status":None,
-		"subfields":{
-			"":""
-		}
+		"subfields":[],
+		"indicator1":" ",
+		"indicator2":" "
 	}
 }
 
@@ -297,6 +324,7 @@ def add_collection_defaults(Record):
 ###### DATA THAT IS SPECIFIC TO OUR TYPES OF RECORDS...
 ###### THEY CORRESPOND TO THE customProperties DICT
 ###### DEFINED IN THE `RECORD` CLASS
+###### AND ALSO WE PARSE THE MARCmapper DICT ABOVE
 
 def parse_speaker_names(Record):
 	namesLNFN = Record.fieldedData['lnfn'].split('|')
@@ -315,9 +343,9 @@ def parse_speaker_names(Record):
 		for x in [
 			fields.Subfield(
 				'a',
-				"[{}. Speaking at the Pacific Film Archive {}.] /".format(
+				"[{}. Speaking at the Pacific Film Archive: {}.] /".format(
 					', '.join(speakers),
-					Record.customProperties['yyyymmdd'][4:]+\
+					Record.customProperties['yyyymmdd'][:4]+\
 						"/"+Record.customProperties['yyyymmdd'][4:6]+\
 						"/"+Record.customProperties['yyyymmdd'][6:8]
 					)
@@ -343,10 +371,12 @@ def parse_film_title_subjects(Record):
 def parse_recording_date(Record):
 	date = Record.fieldedData['recordingDate']
 	try:
+		# this is the date format from filemaker
 		date = datetime.strptime(date,'%a %b %d %H:%M:%S PST %Y')
 		yyyymmdd = datetime.strftime(date,'%Y%m%d')
+		# print(date,yyyymmdd)
 	except:
-		yyyymmdd = date
+		yyyymmdd = 'Date unknown'
 	Record.customProperties['yyyymmdd'] = yyyymmdd
 	if len(Record.customProperties['yyyymmdd']) == 8:
 		recDate = fields.DataField('033','0','0')
@@ -376,6 +406,13 @@ def parse_duration(Record):
 		Record.customProperties['duration'] = Record.fieldedData['duration']
 	except:
 		# leave duration = None
+		pass
+	if Record.customProperties['duration']:
+		# parse it to seconds 
+		# parse that to HHMMSS
+		# and put it in 306
+		# and also customProp['time']
+		# and also 300 $a
 		pass
 
 def main(Record):

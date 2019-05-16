@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import time
 
-yyyymd = time.strftime("%Y%m%d")
+yyyymdNow = datetime.now().strftime("%Y%m%d")
 yymmdd = time.strftime("%y%m%d")
 fractionalNow = datetime.now().strftime("%Y%m%d%H%M%S.%f")[:-4]
 
@@ -121,11 +121,11 @@ class ItemBytes:
 		Desc=" ",
 		DtSt=" ",
 		ELvl=" ",
-		Entered=fractionalNow,
+		Entered=yyyymdNow,
 		EntW=" ",
 		Fest=" ",
 		File="u",
-		FMus=" ",
+		FMus="n",
 		Form=" ",
 		Freq=" ",
 		GPub=" ",
@@ -137,7 +137,7 @@ class ItemBytes:
 		MRec=" ",
 		OCLC=None,
 		Orig=" ",
-		Part=" ",
+		Part="n",
 		Proj="  ",
 		Recstat="n",
 		Regl=" ",
@@ -292,7 +292,6 @@ class ItemBytes:
 					)
 				)
 
-		print(bytes)
 		if len(bytes) == 17:
 			return bytes
 		else:
