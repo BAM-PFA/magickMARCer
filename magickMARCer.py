@@ -73,7 +73,7 @@ class Collection:
 	Just a list of Record objects
 	'''
 	def __init__(self):
-		self.records = {}
+		self.records = {"records":{}}
 
 def parse_csv(Record):
 	for field,elements in MARCmapper.MARCmapper.items():
@@ -125,20 +125,27 @@ def set_fixed_field(Record):
 		Record.ohOhEight = fields.OhOhEight(ffBytes).data
 
 def main():
-	collectionJSON = dataHandlers.main()
+	collectionDict = dataHandlers.main()
 
 	myCollection = Collection()
 
-	for recordUUID,data in collectionJSON.items():
+	for recordUUID,data in collectionDict.items():
 		onerecord = Record(data)
 		MARCmapper.main(onerecord)
 		parse_csv(onerecord)
 		set_fixed_field(onerecord)
 		onerecord.to_json()
 
-		myCollection.records[recordUUID] = onerecord.asJSON
+		# myCollection.records["records"][recordUUID] = {}
+		myCollection.records["records"][recordUUID] = onerecord.asJSON
 
-	print(myCollection.records)
+	# print(myCollection.records)
+	collectionJSON = json.dumps(myCollection.records)
+	print(collectionJSON)
+	with open('data/output.json','w') as f:
+		f.write(collectionJSON)
+
+	return collectionJSON
 
 if __name__ == "__main__":
 	main()
