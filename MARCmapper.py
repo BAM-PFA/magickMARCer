@@ -146,6 +146,20 @@ MARCmapper = {
 		"subfields":[],
 		"indicator1":" ",
 		"indicator2":" "
+	},
+	"url":{
+		"tag":"856",
+		"status":None,
+		"subfields":[
+			{
+				"z":"View item on Internet Archive"
+			},
+			{
+				"u":"value"
+			}
+		],
+		"indicator1":"4",
+		"indicator2":"0"
 	}
 }
 
