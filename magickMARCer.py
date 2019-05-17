@@ -73,7 +73,8 @@ class Collection:
 	Just a list of Record objects
 	'''
 	def __init__(self):
-		self.records = {"records":{}}
+		# self.records = {"records":{}}
+		self.records = []
 
 def parse_csv(Record):
 	for field,elements in MARCmapper.MARCmapper.items():
@@ -129,6 +130,7 @@ def main():
 
 	myCollection = Collection()
 
+	counter = 0
 	for recordUUID,data in collectionDict.items():
 		onerecord = Record(data)
 		MARCmapper.main(onerecord)
@@ -136,16 +138,20 @@ def main():
 		set_fixed_field(onerecord)
 		onerecord.to_json()
 
-		# myCollection.records["records"][recordUUID] = {}
-		myCollection.records["records"][recordUUID] = onerecord.asJSON
+		myCollection.records.append(onerecord.asJSON)
+		# myCollection.records["records"][recordUUID] = onerecord.asJSON
+		counter += 1
+		if counter > 4:
+			break
 
-	# print(myCollection.records)
+	print(len(myCollection.records))
 	collectionJSON = json.dumps(myCollection.records)
-	print(collectionJSON)
-	with open('data/output.json','w') as f:
+	# print(collectionJSON)
+	with open('data/1output.json','w') as f:
 		f.write(collectionJSON)
+		# json.dump(myCollection.records,f)
 
-	return collectionJSON
+	# return collectionJSON
 
 if __name__ == "__main__":
 	main()
