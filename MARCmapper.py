@@ -25,8 +25,8 @@ MARCmapper = {
 		"tag":None,
 		"status":"rawdate",
 		"subfields":[],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"DigitizationNotes":{
 		"tag":"500",
@@ -36,8 +36,8 @@ MARCmapper = {
 				"a":"value"
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"recordingEventDescription":{
 		"tag":"520",
@@ -48,8 +48,8 @@ MARCmapper = {
 				"prefix":"Description of the event: "
 			}
 		],
-		"indicator1":"8",
-		"indicator2":" "
+		"ind1":"8",
+		"ind2":"\\"
 	},
 	"recordingEventRecordingNotes":{
 		"tag":"500",
@@ -60,8 +60,8 @@ MARCmapper = {
 				"prefix":"Notes about the original analog recording: "
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"recordingEventTitle":{
 		"tag":"500",
@@ -72,8 +72,8 @@ MARCmapper = {
 				"prefix":"Title of event: "
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"recordingLocation":{
 		"tag":"500",
@@ -84,8 +84,8 @@ MARCmapper = {
 				"prefix":"Location of recording: "
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"recordingPermissions":{
 		"tag":"540",
@@ -98,8 +98,8 @@ MARCmapper = {
 				"c":"Speaker release form."
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"recordingTapeNumber":{
 		"tag":"500",
@@ -110,8 +110,8 @@ MARCmapper = {
 				"prefix":"Original audiocassette tape number: "
 			}
 		],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"FilmTitle":{
 		"tag":"630",
@@ -122,8 +122,8 @@ MARCmapper = {
 				"suffix":"(Motion Piction)"
 			}
 		],
-		"indicator1":" ",
-		"indicator2":"4"
+		"ind1":"\\",
+		"ind2":"4"
 	},
 	"Speaker":{
 		"tag":"700",
@@ -137,15 +137,15 @@ MARCmapper = {
 				"e":"speaker"
 			}
 		],
-		"indicator1":"1",
-		"indicator2":" "
+		"ind1":"1",
+		"ind2":"\\"
 	},
 	"duration":{
 		"tag":"306",
 		"status":"rawduration",
 		"subfields":[],
-		"indicator1":" ",
-		"indicator2":" "
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"url":{
 		"tag":"856",
@@ -158,8 +158,8 @@ MARCmapper = {
 				"u":"value"
 			}
 		],
-		"indicator1":"4",
-		"indicator2":"0"
+		"ind1":"4",
+		"ind2":"0"
 	}
 }
 
@@ -173,30 +173,8 @@ def add_collection_defaults(Record):
 	with very similar provenance, so there is a lot that is consistent
 	across records for the entire collectoin.
 	'''
-	#### 007
-	#$as$bz$du$eu$fn$gn$hn$in$jn$kn$ln$me$nz
-	ohOhSeven = fields.DataField('007',' ',' ')
-	for x in [
-		fields.Subfield('a','s'),
-		fields.Subfield('b','z'),
-		fields.Subfield('d','u'),
-		fields.Subfield('e','u'),
-		fields.Subfield('f','n'),
-		fields.Subfield('g','n'),
-		fields.Subfield('h','n'),
-		fields.Subfield('i','n'),
-		fields.Subfield('j','n'),
-		fields.Subfield('k','n'),
-		fields.Subfield('l','n'),
-		fields.Subfield('m','e'),
-		fields.Subfield('n','z')
-		]:
-		ohOhSeven.subfields.append(x)
-
-	Record.dataFields.append(ohOhSeven)
-
 	### 264
-	publication = fields.DataField('264',' ','1')
+	publication = fields.DataField('264','\\','1')
 	for x in [
 		fields.Subfield(
 			'a',
@@ -217,7 +195,7 @@ def add_collection_defaults(Record):
 
 	### 336
 	### 337
-	media = fields.DataField('337',' ',' ')
+	media = fields.DataField('337','\\','\\')
 	for x in [
 		fields.Subfield('a','computer'),
 		fields.Subfield('2','rdamedia')
@@ -227,7 +205,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(media)
 
 	### 338
-	carrier = fields.DataField('338',' ',' ')
+	carrier = fields.DataField('338','\\','\\')
 	for x in [
 		fields.Subfield('a','online resource'),
 		fields.Subfield('2','rdacarrier')
@@ -237,7 +215,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(carrier)
 
 	### 344 type recording
-	typerecording = fields.DataField('344',' ',' ')
+	typerecording = fields.DataField('344','\\','\\')
 	for x in [
 		fields.Subfield('a','digital'),
 		fields.Subfield('2','rdatr')
@@ -247,17 +225,19 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(typerecording)
 
 	### 344 channels
-	channels = fields.DataField('344',' ',' ')
-	for x in [
-		fields.Subfield('g',Record.customProperties['MonoStereo']),
-		fields.Subfield('2','rdacpc')
-		]:
-		channels.subfields.append(x)
+	channelSpec = Record.customProperties['MonoStereo']
+	if (channelSpec and channelSpec != "unknown") :
+		channels = fields.DataField('344','\\','\\')
+		for x in [
+			fields.Subfield('g',Record.customProperties['MonoStereo']),
+			fields.Subfield('2','rdacpc')
+			]:
+			channels.subfields.append(x)
 
-	Record.dataFields.append(channels)
+		Record.dataFields.append(channels)
 
 	### 347 file type
-	fType = fields.DataField('347',' ',' ')
+	fType = fields.DataField('347','\\','\\')
 	for x in [
 		fields.Subfield('a','audio file'),
 		fields.Subfield('2','rdaft')
@@ -267,7 +247,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(fType)
 
 	### 347 bitrate
-	bitrate = fields.DataField('347',' ',' ')
+	bitrate = fields.DataField('347','\\','\\')
 	bitrate.subfields.append(
 		fields.Subfield('f','variable bit rate 190-250 kbit/s')
 		)
@@ -275,7 +255,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(bitrate)
 
 	### 500 general pfa note
-	pfanote = fields.DataField('500',' ',' ')
+	pfanote = fields.DataField('500','\\','\\')
 	pfanote.subfields.append(
 		fields.Subfield(
 			'a',
@@ -288,14 +268,14 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(pfanote)
 
 	### 542 copyright
-	copyright = fields.DataField('542',' ',' ')
+	copyright = fields.DataField('542','\\','\\')
 	copyright.subfields.append(
 		fields.Subfield('a','Boilerplate copyright statement TBD')
 		)
 	Record.dataFields.append(copyright)
 
 	### 536
-	funding = fields.DataField('536',' ',' ')
+	funding = fields.DataField('536','\\','\\')
 	funding.subfields.append(
 		fields.Subfield('a',
 		('Digitization sponsored by a grant from the '
@@ -305,7 +285,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(funding)
 
 	### 530 additional physical form
-	addForm = fields.DataField('530',' ',' ')
+	addForm = fields.DataField('530','\\','\\')
 	for x in [
 		fields.Subfield('a','Originally recorded on audio cassette.'),
 		fields.Subfield('c','Access to original tape may be restricted.')
@@ -315,7 +295,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(addForm)
 
 	### 710 BAMPFA
-	bampfa = fields.DataField('710','2',' ')
+	bampfa = fields.DataField('710','2','\\')
 	for x in [
 		fields.Subfield('a','UC Berkeley Art Museum and Pacific Film Archive, '),
 		fields.Subfield('e','host institution')
@@ -324,7 +304,7 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(bampfa)
 
 	### 710 CLIR
-	clir = fields.DataField('710','2',' ')
+	clir = fields.DataField('710','2','\\')
 	for x in [
 		fields.Subfield('a','CLIR, '),
 		fields.Subfield('e','sponsoring body')
@@ -344,7 +324,7 @@ def parse_speaker_names(Record):
 	namesLNFN = Record.fieldedData['lnfn'].split('|')
 	if namesLNFN != ['']:
 		for name in namesLNFN:
-			addedEntry = fields.DataField('700','1',' ',)
+			addedEntry = fields.DataField('700','1','\\',)
 			for x in [
 				fields.Subfield('a',name),
 				fields.Subfield('e','speaker')
@@ -376,7 +356,7 @@ def parse_film_title_subjects(Record):
 	titles = Record.fieldedData['FilmTitles'].split('|')
 	if titles != ['']:
 		for title in titles:
-			subj = fields.DataField('630',' ','4')
+			subj = fields.DataField('630','\\','4')
 			subj.subfields.append(
 				fields.Subfield('a',title+" (Motion Picture)")
 				)
@@ -411,8 +391,6 @@ def parse_stereo_mono(Record):
 	if not Record.customProperties['MonoStereo']:
 		# if the key exists but it's empty
 		Record.customProperties['MonoStereo'] = 'unknown'
-	if not Record.customProperties['MonoStereo'] == 'unknown':
-		channels = fields.DataField()
 
 
 def parse_duration(Record):
@@ -429,10 +407,50 @@ def parse_duration(Record):
 		# and also 300 $a
 		pass
 
+def set_ohOhSeven(Record):
+	'''
+	THESE VALUES ARE SET FOR OUR PARTICULAR COLLECTION.
+	'''
+	formatDict = {}
+	if Record.customProperties['format'] == "REC":
+		'''
+		This is a collection of streaming digital audio
+		'''
+		channels = Record.customProperties['MonoStereo']
+		if (channels and channels == "unknown"):
+			e = "u"
+		elif (channels and channels == "mono"):
+			e = "m"
+		elif (channels and channels == "stereo"):
+			e = "s"
+		elif (channels and channels == "surround"):
+			e = "q"
+		else:
+			e = "\\"
+
+		formatDict['a'] = "s"	# Category of material = sound recording
+		formatDict['b'] = "z"	# Specific material designation = other
+		formatDict['d'] = "\\"	# Speed = not coded
+		formatDict['e'] = e 	# Channel config set by Record.MonoStereo
+		formatDict['f'] = "n"	# Groove = n/a
+		formatDict['g'] = "n"	# Dimensions = n/a
+		formatDict['h'] = "n"	# Tape width = n/a
+		formatDict['i'] = "n"	# Tape config  = n/a
+		formatDict['j'] = "n"	# Kind of disc/etc = n/a
+		formatDict['k'] = "n"	# Kind of mat'l = n/a
+		formatDict['l'] = "n"	# Kind of cutting = n/a
+		formatDict['m'] = "e"	# Special playback chars = digital recording
+		formatDict['n'] = "z"	# Capture/Storage tech. = Other
+	
+	ohOhSevenObject = fields.OhOhSeven(
+		**formatDict
+		)
+	return ohOhSevenObject.data
+
 def main(Record):
-	add_collection_defaults(Record)
 	parse_stereo_mono(Record)
 	parse_recording_date(Record)
 	parse_speaker_names(Record)
 	parse_film_title_subjects(Record)
 	parse_duration(Record)
+	add_collection_defaults(Record)

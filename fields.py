@@ -12,12 +12,12 @@ class DataField:
 		def __init__(
 			self,
 			tag,
-			indicator1=' ',
-			indicator2=' '
+			ind1='\\',
+			ind2='\\'
 			):
 			self.tag = tag
-			self.indicator1 = indicator1
-			self.indicator2 = indicator2
+			self.ind1 = ind1
+			self.ind2 = ind2
 
 			self.subfields = []
 
@@ -58,11 +58,84 @@ class Leader:
 				"00000", # Base Address of Data (system supplied???)
 				self.ItemBytes.ELvl,
 				self.ItemBytes.Desc,
-				" ",
+				"\\",
 				"4", # Length of the length-of-field portion
 				"5", # Length of the starting-character-position portion
 				"0", # Length of the implementation-defined portion
 				"0"  # Undefined
+				)
+			)
+
+class OhOhSeven:
+	def __init__(self,
+		a="\\",
+		b="\\",
+		c="\\",
+		d="\\",
+		e="\\",
+		f="\\",
+		g="\\",
+		h="\\",
+		i="\\",
+		j="\\",
+		k="\\",
+		l="\\",
+		m="\\",
+		n="\\",
+		o="\\",
+		p="\\",
+		q="\\",
+		r="\\\\\\\\"
+		):
+		# I think 007 only has up to 'r' subfields...
+		self.a = a
+		self.b = b
+		self.c = c
+		self.d = d
+		self.e = e
+		self.f = f
+		self.g = g
+		self.h = h
+		self.i = i
+		self.j = j
+		self.k = k
+		self.l = l
+		self.m = m
+		self.n = n
+		self.o = o
+		self.p = p
+		self.q = q
+		self.r = r
+
+		self.data = (
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}"
+			"{}".format(
+				self.a,
+				self.c,
+				self.b,
+				self.d,
+				self.e,
+				self.f,
+				self.g,
+				self.h,
+				self.i,
+				self.j,
+				self.k,
+				self.l,
+				self.m,
+				self.n
 				)
 			)
 
@@ -106,52 +179,52 @@ class ItemBytes:
 	def __init__(
 		self,
 		format,
-		AccM="      ",
-		Alph=" ",
-		Audn=" ",
-		Biog=" ",
-		BLvl=" ",
-		Comp="  ",
-		Conf=" ",
-		Cont="    ",
+		AccM="\\\\\\\\\\\\",
+		Alph="\\",
+		Audn="\\",
+		Biog="\\",
+		BLvl="\\",
+		Comp="\\\\",
+		Conf="\\",
+		Cont="\\\\\\\\",
 		CrTp="a",
-		Ctrl=" ",
-		Ctry="   ",
-		Dates="        ",
-		Desc=" ",
-		DtSt=" ",
-		ELvl=" ",
+		Ctrl="\\",
+		Ctry="\\\\\\",
+		Dates="\\\\\\\\\\\\\\\\",
+		Desc="\\",
+		DtSt="\\",
+		ELvl="\\",
 		Entered=yyyymdNow,
-		EntW=" ",
-		Fest=" ",
+		EntW="\\",
+		Fest="\\",
 		File="u",
 		FMus="n",
-		Form=" ",
-		Freq=" ",
-		GPub=" ",
-		Ills="    ",
-		Indx=" ",
-		Lang="   ",
+		Form="\\",
+		Freq="\\",
+		GPub="\\",
+		Ills="\\\\\\\\",
+		Indx="\\",
+		Lang="\\\\\\",
 		LitF="u",
-		LTxt="  ",
-		MRec=" ",
+		LTxt="\\\\",
+		MRec="\\",
 		OCLC=None,
-		Orig=" ",
+		Orig="\\",
 		Part="n",
-		Proj="  ",
+		Proj="\\\\",
 		Recstat="n",
-		Regl=" ",
-		Relf="    ",
-		Replaced="                ",
-		SpFm="  ",
+		Regl="\\",
+		Relf="\\\\\\\\",
+		Replaced="\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+		SpFm="\\\\",
 		Srce="d",
-		SrTp=" ",
+		SrTp="\\",
 		SL="0",
 		Tech="n",
-		Time="   ",
-		TMat=" ",
+		Time="\\\\\\",
+		TMat="\\",
 		TrAr="n",
-		Type=" "
+		Type="\\"
 		):
 		self.format = format
 		self.AccM=AccM
@@ -226,7 +299,7 @@ class ItemBytes:
 					self.Conf,
 					self.Fest,
 					self.Indx,
-					" ",
+					"\\",
 					self.LitF,
 					self.Biog
 					)
@@ -251,9 +324,9 @@ class ItemBytes:
 					self.Form,
 					self.AccM,
 					self.LTxt,
-					" ",
+					"\\",
 					self.TrAr,
-					" "
+					"\\"
 					)
 				)
 
@@ -275,18 +348,18 @@ class ItemBytes:
 				"{}"
 				"{}".format(
 					self.Time,
-					" ",
+					"\\",
 					self.Audn,
-					" ",
-					" ",
-					" ",
-					" ",
-					" ",
+					"\\",
+					"\\",
+					"\\",
+					"\\",
+					"\\",
 					self.GPub,
 					self.Form,
-					" ",
-					" ",
-					" ",
+					"\\",
+					"\\",
+					"\\",
 					self.TMat,
 					self.Tech
 					)

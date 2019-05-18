@@ -21,11 +21,9 @@ def rows_to_json(dataPath):
 		data = [row for row in reader]
 
 	collectionJSON = {}
-	print(headers)
-	# sys.exit()
+	# print(headers)
 
 	for record in data:
-		# print(record)
 		recordUUID = str(uuid.uuid4())
 		collectionJSON[recordUUID] = {}
 		# print(collectionJSON[recordUUID])
