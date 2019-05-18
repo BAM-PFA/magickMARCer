@@ -334,14 +334,18 @@ def parse_speaker_names(Record):
 	speakers = Record.fieldedData['Speakers'].split('|')
 	if speakers != ['']:
 		titleProper = fields.DataField('245','0','0')
+		date = Record.customProperties['yyyymmdd']
+		try:
+			if all([isinstance(int(d),int) for d in date]):
+				dateFinal = "{}/{}/{}".format(date[:4],date[4:6],date[6:8])
+		except:
+			dateFinal = date
 		for x in [
 			fields.Subfield(
 				'a',
 				"[{}. Speaking at the Pacific Film Archive: {}.] /".format(
 					', '.join(speakers),
-					Record.customProperties['yyyymmdd'][:4]+\
-						"/"+Record.customProperties['yyyymmdd'][4:6]+\
-						"/"+Record.customProperties['yyyymmdd'][6:8]
+					dateFinal
 					)
 				),
 			fields.Subfield(
@@ -366,11 +370,17 @@ def parse_recording_date(Record):
 	date = Record.fieldedData['recordingDate']
 	try:
 		# this is the date format from filemaker
+		# CHECK FOR EITHER PST OR PDT!!!
 		date = datetime.strptime(date,'%a %b %d %H:%M:%S PST %Y')
 		yyyymmdd = datetime.strftime(date,'%Y%m%d')
-		# print(date,yyyymmdd)
+		# print(date)#,yyyymmdd)
 	except:
-		yyyymmdd = 'Date unknown'
+		try:
+			date = datetime.strptime(date,'%a %b %d %H:%M:%S PDT %Y')
+			yyyymmdd = datetime.strftime(date,'%Y%m%d')
+		except:
+			yyyymmdd = 'date unknown'
+
 	Record.customProperties['yyyymmdd'] = yyyymmdd
 	if len(Record.customProperties['yyyymmdd']) == 8:
 		recDate = fields.DataField('033','0','0')

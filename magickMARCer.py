@@ -66,7 +66,7 @@ class Record:
 				}
 			}
 			for subfield in field.subfields:
-				subfield.value = subfield.value.replace('/',r'\/')
+				# subfield.value = subfield.value.replace('/',r'\/')
 				fieldDict[field.tag]["subfields"].append(
 					{subfield.subfieldCharacter:subfield.value}
 					)
@@ -152,6 +152,7 @@ def main():
 		parse_csv(onerecord)
 		set_fixed_field(onerecord)
 		onerecord.to_json()
+		# print(onerecord.customProperties['yyyymmdd'])
 
 		myCollection.records.append(onerecord.asJSON)
 		# counter += 1
