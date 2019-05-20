@@ -23,14 +23,14 @@ Maybe this could be set in a config file if this were to be more broadly applica
 MARCmapper = {
 	"recordingDate":{
 		"tag":None,
-		"status":"rawdate",
+		"instructions":"rawdate",
 		"subfields":[],
 		"ind1":"\\",
 		"ind2":"\\"
 	},
 	"DigitizationNotes":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value"
@@ -41,7 +41,7 @@ MARCmapper = {
 	},
 	"recordingEventDescription":{
 		"tag":"520",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -53,7 +53,7 @@ MARCmapper = {
 	},
 	"recordingEventRecordingNotes":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -65,7 +65,7 @@ MARCmapper = {
 	},
 	"recordingEventTitle":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -77,7 +77,7 @@ MARCmapper = {
 	},
 	"recordingLocation":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -89,7 +89,7 @@ MARCmapper = {
 	},
 	"recordingPermissions":{
 		"tag":"540",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value"
@@ -103,7 +103,7 @@ MARCmapper = {
 	},
 	"recordingTapeNumber":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -115,7 +115,7 @@ MARCmapper = {
 	},
 	"FilmTitle":{
 		"tag":"630",
-		"status":"Parsed specifically in its own function",
+		"instructions":"Parsed specifically in its own function",
 		"subfields":[
 			{
 				"a":"value",
@@ -127,7 +127,7 @@ MARCmapper = {
 	},
 	"Speaker":{
 		"tag":"700",
-		"status":"Parsed specifically in its own function",
+		"instructions":"Parsed specifically in its own function",
 		"subfields":[
 			{
 				"a":"value",
@@ -142,14 +142,14 @@ MARCmapper = {
 	},
 	"duration":{
 		"tag":"306",
-		"status":"rawduration",
+		"instructions":"rawduration",
 		"subfields":[],
 		"ind1":"\\",
 		"ind2":"\\"
 	},
 	"url":{
 		"tag":"856",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"z":"View item on Internet Archive"
