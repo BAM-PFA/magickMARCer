@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 import argparse
 import ast
-# from collections import OrderedDict
 import configparser
 import csv
-from datetime import datetime
 import json
 import os
-import time
 
 import fields
 import dataHandlers
@@ -71,7 +68,7 @@ class Collection:
 	def __init__(self):
 		self.records = []
 
-def parse_csv(Record):
+def parse_csv_data(Record):
 	for field,elements in MARCmapper.MARCmapper.items():
 		if not elements['instructions']:
 			# i.e., if there are not separate processing instructions
@@ -101,7 +98,7 @@ def parse_csv(Record):
 				# ADD THE FIELD TO THE RECORD
 				Record.dataFields.append(marcField)
 
-def set_fixed_field(Record):
+def set_fixed_field(Record,config):
 	'''
 	BASED ON THE CUSTOM STUFF SET IN RECORD.customProperties,
 	CREATE LDR AND 008 FIELDS.
@@ -126,7 +123,7 @@ def set_fixed_field(Record):
 		Record.leader = fields.Leader(ffBytes).data
 		Record.ohOhEight = fields.OhOhEight(ffBytes).data
 
-	Record.ohOhSeven = MARCmapper.set_ohOhSeven(Record)
+	Record.ohOhSeven = MARCmapper.set_ohOhSeven(Record,config)
 
 def read_config():
 	scriptDirectory = os.path.dirname(os.path.abspath(__file__))
@@ -166,7 +163,6 @@ def set_args():
 			'Default is in the ./data directory under this folder.'
 			),
 		default='./data/'
-		required=True
 		)
 
 	return parser.parse_args()
@@ -191,8 +187,8 @@ def main():
 	for recordUUID,data in collectionDict.items():
 		onerecord = Record(data,customProperties)
 		MARCmapper.main(onerecord)
-		parse_csv(onerecord)
-		set_fixed_field(onerecord)
+		parse_csv_data(onerecord)
+		set_fixed_field(onerecord,config)
 		onerecord.to_json()
 		# print(onerecord.customProperties['yyyymmdd'])
 

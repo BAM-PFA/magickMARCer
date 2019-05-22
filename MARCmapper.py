@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import ast
 from datetime import datetime
 import fields
 
@@ -417,11 +418,14 @@ def parse_duration(Record):
 		# and also 300 $a
 		pass
 
-def set_ohOhSeven(Record):
+def set_ohOhSeven(Record,config):
 	'''
-	THESE VALUES ARE SET FOR OUR PARTICULAR COLLECTION.
+	THESE VALUES ARE MOSTLY SET FOR THE PARTICULAR COLLECTION
+	IN CONFIG.INI WITH ADD'L VALUES BASED ON RECORD SPECIFICS 
 	'''
-	formatDict = {}
+	formatDict = ast.literal_eval(config['ohOhSeven']['ohOhSeven'])
+	# channels = Record.customProperties['']
+
 	if Record.customProperties['format'] == "REC":
 		'''
 		This is a collection of streaming digital audio
@@ -438,19 +442,13 @@ def set_ohOhSeven(Record):
 		else:
 			e = "\\"
 
-		formatDict['a'] = "s"	# Category of material = sound recording
-		formatDict['b'] = "z"	# Specific material designation = other
-		formatDict['d'] = "\\"	# Speed = not coded
-		formatDict['e'] = e 	# Channel config set by Record.MonoStereo
-		formatDict['f'] = "n"	# Groove = n/a
-		formatDict['g'] = "n"	# Dimensions = n/a
-		formatDict['h'] = "n"	# Tape width = n/a
-		formatDict['i'] = "n"	# Tape config  = n/a
-		formatDict['j'] = "n"	# Kind of disc/etc = n/a
-		formatDict['k'] = "n"	# Kind of mat'l = n/a
-		formatDict['l'] = "n"	# Kind of cutting = n/a
-		formatDict['m'] = "e"	# Special playback chars = digital recording
-		formatDict['n'] = "z"	# Capture/Storage tech. = Other
+		formatDict['e'] = e	
+
+	elif Record.customProperties['format'] == 'VIS':
+		pass
+
+	else:
+		return '' 
 	
 	ohOhSevenObject = fields.OhOhSeven(
 		**formatDict
