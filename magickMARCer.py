@@ -5,6 +5,7 @@ import configparser
 import csv
 import json
 import os
+import re
 
 import fields
 import dataHandlers
@@ -29,6 +30,8 @@ class Record:
 		self.ohOhSix = None
 		self.ohOhEight = None
 		self.ohOhSeven = None
+		self.originalYear = None
+		self.reproductionYear = None
 
 		self.asJSON = {}
 
@@ -72,7 +75,7 @@ def parse_csv_data(Record):
 	for field,elements in MARCmapper.MARCmapper.items():
 		if not elements['instructions']:
 			# i.e., if there are not separate processing instructions
-			if Record.fieldedData[field] not in (None,"None",""," "):
+			if field in Record.fieldedData and Record.fieldedData[field] not in (None,"None",""," "):
 				# i.e., if there is actually data in the CSV
 				theValue = Record.fieldedData[field]
 				marcField = fields.DataField(
@@ -118,6 +121,13 @@ def set_fixed_field(Record,config):
 		Time=Record.customProperties['Time'],
 		Type=Record.customProperties['Type']
 		)
+	if 'year' in Record.fieldedData:
+		year = Record.fieldedData['year']
+		# print(re.sub("(.+)(\\\\\\\\)$","\1"+year,ffBytes.Dates))
+		ffBytes.Dates = re.sub(r"(.*)(\\\\\\\\)$",r"\1_"+year,ffBytes.Dates)
+		ffBytes.Dates = ffBytes.Dates.replace("_","")
+		print(ffBytes.Dates)
+
 	ffBytes.set_008_bytes()
 	if ffBytes:
 		Record.leader = fields.Leader(ffBytes).data
@@ -177,6 +187,7 @@ def main():
 
 	config = read_config()
 	customProperties = config['customProperties'][configProperties]
+	# print(customProperties)
 	customProperties = ast.literal_eval(customProperties)
 
 	collectionDict = dataHandlers.main(dataPath)
@@ -189,9 +200,11 @@ def main():
 		MARCmapper.main(onerecord)
 		parse_csv_data(onerecord)
 		set_fixed_field(onerecord,config)
+		MARCmapper.set_nonfiling_indicator(onerecord)
+		MARCmapper.set_duration(onerecord)
 		onerecord.to_json()
 		# print(onerecord.customProperties['yyyymmdd'])
-
+		print(onerecord.asJSON)
 		myCollection.records.append(onerecord.asJSON)
 		# counter += 1
 		# if counter > 4:
