@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from collections import OrderedDict
+import argparse
+import ast
+import configparser
 import csv
-from datetime import datetime
 import json
-import time
+import os
+import re
 
 import fields
 import dataHandlers
@@ -16,35 +18,21 @@ class Record:
 	'''
 	def __init__(
 		self,
-		fieldedData
+		fieldedData,
+		customProperties=None
 		):
 		self.fieldedData = fieldedData
+		self.customProperties = customProperties
 
 		self.dataFields = []
+
 		self.leader = None
 		self.ohOhSix = None
 		self.ohOhEight = None
 		self.ohOhSeven = None
-		# self.format = None
-		self.customProperties = {
-			# defining some properties specific to our project here
-			'MonoStereo':None,	# set to mono/stereo/surround/unknown for 344/007 use
-			'yyyymmdd':None,
-			'duration':None,
-			'format':"REC", 	# This is the 3-letter MARC format code
-			'BLvl':'m', 		# level of bibliographic description
-			'Ctry':'cau',		# MARC country code
-			'Dates':'\\\\\\\\\\\\\\\\',	# Date1+Date2
-			'DtSt':'s',			# Date Status ('s' for single)
-			'ELvl':'m',			# Encoding level ('m' for minimal)
-			'Form':'o',			# Form of item
-			'Lang':'eng',		# Language of material
-			'LTxt':'lt',		# 008 audio textual content;
-								#   set to 'l' for lecture, 't' for interview
-			'Time':'\\\\\\',	# duration in minutes
-			'Type':'i',			# 1-letter code for "type of record"
-			"NumberOfFiles":""	# number of files in the resource, used in 300
-			}
+		self.originalYear = None
+		self.reproductionYear = None
+
 		self.asJSON = {}
 
 	def to_json(self):
@@ -66,7 +54,6 @@ class Record:
 				}
 			}
 			for subfield in field.subfields:
-				# subfield.value = subfield.value.replace('/',r'\/')
 				fieldDict[field.tag]["subfields"].append(
 					{subfield.subfieldCharacter:subfield.value}
 					)
@@ -76,7 +63,7 @@ class Record:
 		temp['fields'] = sorted(temp['fields'], key= lambda t: list(t.keys())[0])
 
 		self.asJSON = temp
-		
+
 class Collection:
 	'''
 	Just a list of Record objects
@@ -84,11 +71,11 @@ class Collection:
 	def __init__(self):
 		self.records = []
 
-def parse_csv(Record):
+def parse_csv_data(Record):
 	for field,elements in MARCmapper.MARCmapper.items():
-		if not elements['status']:
+		if not elements['instructions']:
 			# i.e., if there are not separate processing instructions
-			if Record.fieldedData[field] not in (None,"None",""," "):
+			if field in Record.fieldedData and Record.fieldedData[field] not in (None,"None",""," "):
 				# i.e., if there is actually data in the CSV
 				theValue = Record.fieldedData[field]
 				marcField = fields.DataField(
@@ -96,6 +83,7 @@ def parse_csv(Record):
 					elements['ind1'],
 					elements['ind2']
 					)
+				# PARSE OUT ALL THE SUBFIELDS
 				for subfieldDict in elements['subfields']:
 					if 'prefix' in subfieldDict.keys():
 						theValue = subfieldDict['prefix']+theValue
@@ -113,11 +101,11 @@ def parse_csv(Record):
 				# ADD THE FIELD TO THE RECORD
 				Record.dataFields.append(marcField)
 
-def set_fixed_field(Record):
+def set_fixed_field(Record,config):
 	'''
 	BASED ON THE CUSTOM STUFF SET IN RECORD.customProperties,
 	CREATE LDR AND 008 FIELDS.
-	ALSO, PARSE AN 007 FROM THE 'FORMAT' PROPERTY AND THE 
+	ALSO, PARSE AN 007 FROM THE 'FORMAT' PROPERTY AND THE
 	CUSTOM VALUES IN MARCmapper.set_ohOhSeven()
 	'''
 	ffBytes = fields.ItemBytes(
@@ -133,27 +121,90 @@ def set_fixed_field(Record):
 		Time=Record.customProperties['Time'],
 		Type=Record.customProperties['Type']
 		)
+	if Record.fieldedData['year'] not in (""," "):
+		year = Record.fieldedData['year']
+		# print(re.sub("(.+)(\\\\\\\\)$","\1"+year,ffBytes.Dates))
+		ffBytes.Dates = re.sub(r"(.*)(19uu)$",r"\1_"+year,ffBytes.Dates)
+		ffBytes.Dates = ffBytes.Dates.replace("_","")
+		# print(ffBytes.Dates)
+
 	ffBytes.set_008_bytes()
 	if ffBytes:
 		Record.leader = fields.Leader(ffBytes).data
 		Record.ohOhEight = fields.OhOhEight(ffBytes).data
 
-	Record.ohOhSeven = MARCmapper.set_ohOhSeven(Record)
+	Record.ohOhSeven = MARCmapper.set_ohOhSeven(Record,config)
+
+def read_config():
+	scriptDirectory = os.path.dirname(os.path.abspath(__file__))
+	configPath = os.path.join(scriptDirectory,'config.ini')
+	config = configparser.SafeConfigParser()
+	config.read(configPath)
+
+	return config
+
+def set_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument(
+		'-d','--dataPath',
+		help='path path to data CSV file',
+		required=True
+		)
+	# parser.add_argument(
+	# 	'-r','--recordType',
+	# 	help=(
+	# 		'3-letter MARC code for record type (BKS,REC,VIS,etc.)'
+	# 		'This code should apply to all the records in the CSV...'
+	# 		),
+	# 	required=True
+	# 	)
+	parser.add_argument(
+		'-c','--configProperties',
+		help=(
+			'This should correspond the name of a dict defined in config.ini '
+			'which will define properties used in fixed field, 007, 300, etc.'
+			),
+		required=True
+		)
+	parser.add_argument(
+		'-o','--outputPath',
+		help=(
+			'Path to directory where you want the output JSON file to live. '
+			'Default is in the ./data directory under this folder.'
+			),
+		default='./data/'
+		)
+
+	return parser.parse_args()
 
 def main():
-	collectionDict = dataHandlers.main()
+	args = set_args()
+	dataPath = args.dataPath
+	# recordType = args.recordType
+	print(dataPath)
+	configProperties = args.configProperties
+
+
+	config = read_config()
+	customProperties = config['customProperties'][configProperties]
+	# print(customProperties)
+	customProperties = ast.literal_eval(customProperties)
+
+	collectionDict = dataHandlers.main(dataPath)
 
 	myCollection = Collection()
 
 	# counter = 0
 	for recordUUID,data in collectionDict.items():
-		onerecord = Record(data)
+		onerecord = Record(data,customProperties)
 		MARCmapper.main(onerecord)
-		parse_csv(onerecord)
-		set_fixed_field(onerecord)
+		parse_csv_data(onerecord)
+		set_fixed_field(onerecord,config)
+		MARCmapper.set_nonfiling_indicator(onerecord)
+		MARCmapper.set_duration(onerecord)
 		onerecord.to_json()
 		# print(onerecord.customProperties['yyyymmdd'])
-
+		print(onerecord.asJSON)
 		myCollection.records.append(onerecord.asJSON)
 		# counter += 1
 		# if counter > 4:

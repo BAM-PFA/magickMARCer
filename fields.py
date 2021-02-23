@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import time
 
-yyyymdNow = datetime.now().strftime("%Y%m%d")
+yyyymdNow = datetime.now().strftime("%y%m%d")
 yymmdd = time.strftime("%y%m%d")
 fractionalNow = datetime.now().strftime("%Y%m%d%H%M%S.%f")[:-4]
 
@@ -70,7 +70,7 @@ class OhOhSeven:
 	def __init__(self,
 		a="\\",
 		b="\\",
-		c="\\",
+		c="||", # annoyingly, $c doesn't exist in 007 but you still have to leave an empty space for where it would go
 		d="\\",
 		e="\\",
 		f="\\",
@@ -123,8 +123,8 @@ class OhOhSeven:
 			"{}"
 			"{}".format(
 				self.a,
-				self.c,
 				self.b,
+				self.c,
 				self.d,
 				self.e,
 				self.f,
@@ -364,10 +364,47 @@ class ItemBytes:
 					self.Tech
 					)
 				)
+		elif self.format == "COM":
+			bytes = (
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}"
+				"{}".format(
+					"\\",
+					"\\",
+					"\\",
+					"\\",
+					self.Audn,
+					self.Form,
+					"\\",
+					"\\",
+					self.File,
+					"\\",
+					self.GPub,
+					"\\",
+					"\\",
+					"\\",
+					"\\",
+					"\\",
+					"\\"
+					)
+				)
+		# print(len(bytes))
 
 		if len(bytes) == 17:
 			return bytes
 		else:
 			return False
-
-

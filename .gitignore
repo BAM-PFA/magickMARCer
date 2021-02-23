@@ -1,3 +1,7 @@
 .DS*
 __py*
-*output.json
+data/*
+!data/sample.mrc
+!data/output.mrc
+!data/output.json
+!data/2020_09-01_tvtv-export-csv_for-MARC_w-genre-w-856-w-subj-w-notes.csv

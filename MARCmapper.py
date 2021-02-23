@@ -1,36 +1,38 @@
 #!/usr/bin/env python3
+import ast
 from datetime import datetime
 import fields
 
 '''
-This file has stuff that is used to map data that is specific to our 
+This file has stuff that is used to map data that is specific to our
 particular instance. So:
 * MARCmapper is a dict that maps the data coming
   in from our source CSV.
 * add_collection_defaults() adds fields to each record that will be consistent
   across this entire collection
-* Then there's a set of functions designed to add fields that parse out 
+* Then there's a set of functions designed to add fields that parse out
   some of our specific data, namely:
   * speaker names (that go to 245 and 700)
   * film titles as subjects (that go to 630)
-  * date of recording 
+  * date of recording
 
-Some of that specific data is added to properties of the `Record` class in a 
+Some of that specific data is added to properties of the `Record` class in a
 `customProperties` dict.
 Maybe this could be set in a config file if this were to be more broadly applicable?
 '''
 
+#MARCmapper_TVTV
 MARCmapper = {
-	"recordingDate":{
+	"year":{
 		"tag":None,
-		"status":"rawdate",
+		"instructions":"rawdate",
 		"subfields":[],
 		"ind1":"\\",
 		"ind2":"\\"
 	},
-	"DigitizationNotes":{
-		"tag":"500",
-		"status":None,
+	"summary":{
+		"tag":"520",
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value"
@@ -39,9 +41,80 @@ MARCmapper = {
 		"ind1":"\\",
 		"ind2":"\\"
 	},
+	"duration":{
+		"tag":"500",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"Running time: "
+			}
+		],
+		"ind1":"\\",
+		"ind2":"\\"
+	},
+	"note1":{
+		"tag":"500",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value"
+			}
+		],
+		"ind1":"\\",
+		"ind2":"\\"
+	},
+	"DigitizationNotes":{
+		"tag":"500",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value"
+			}
+		],
+		"ind1":"\\",
+		"ind2":"\\"
+	},
+	"title":{
+		"tag":"245",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value",
+				"b":" [unedited footage] /",
+				"c":"Top Value Television (Production company)"
+			}
+		],
+		"ind1":"0",
+		"ind2":"0"
+	},
+	"itemNumber":{
+		"tag":"035",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value",
+				"prefix":"cbpf_"
+			}
+		],
+		"ind1":"\\",
+		"ind2":"\\"
+	},
+	"genreForm":{
+		"tag":"655",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value",
+				"2":"lcgft"
+			}
+		],
+		"ind1":"\\",
+		"ind2":"0"
+	},
 	"recordingEventDescription":{
 		"tag":"520",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -53,7 +126,7 @@ MARCmapper = {
 	},
 	"recordingEventRecordingNotes":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -65,7 +138,7 @@ MARCmapper = {
 	},
 	"recordingEventTitle":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -77,7 +150,7 @@ MARCmapper = {
 	},
 	"recordingLocation":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
@@ -89,7 +162,7 @@ MARCmapper = {
 	},
 	"recordingPermissions":{
 		"tag":"540",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value"
@@ -101,55 +174,28 @@ MARCmapper = {
 		"ind1":"\\",
 		"ind2":"\\"
 	},
-	"recordingTapeNumber":{
+	"accessionNumber":{
 		"tag":"500",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"a":"value",
-				"prefix":"Original audiocassette tape number: "
+				"prefix":"Original videotape accession number: "
 			}
 		],
 		"ind1":"\\",
-		"ind2":"\\"
-	},
-	"FilmTitle":{
-		"tag":"630",
-		"status":"Parsed specifically in its own function",
-		"subfields":[
-			{
-				"a":"value",
-				"suffix":"(Motion Piction)"
-			}
-		],
-		"ind1":"\\",
-		"ind2":"4"
-	},
-	"Speaker":{
-		"tag":"700",
-		"status":"Parsed specifically in its own function",
-		"subfields":[
-			{
-				"a":"value",
-				"suffix":", "
-			},
-			{
-				"e":"speaker"
-			}
-		],
-		"ind1":"1",
 		"ind2":"\\"
 	},
 	"duration":{
 		"tag":"306",
-		"status":"rawduration",
+		"instructions":"rawduration",
 		"subfields":[],
 		"ind1":"\\",
 		"ind2":"\\"
 	},
 	"url":{
 		"tag":"856",
-		"status":None,
+		"instructions":None,
 		"subfields":[
 			{
 				"z":"View item on Internet Archive"
@@ -160,8 +206,162 @@ MARCmapper = {
 		],
 		"ind1":"4",
 		"ind2":"0"
+	},
+	"subj1":{
+		"tag":"650",
+		"instructions":None,
+		"subfields":[
+			{
+				"a":"value"
+			}
+		],
+		"ind1":"\\",
+		"ind2":"0"
 	}
 }
+
+# MARCmapper_CLIR = {
+# 	"recordingDate":{
+# 		"tag":None,
+# 		"instructions":"rawdate",
+# 		"subfields":[],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"DigitizationNotes":{
+# 		"tag":"500",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value"
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingEventDescription":{
+# 		"tag":"520",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"prefix":"Description of the event: "
+# 			}
+# 		],
+# 		"ind1":"8",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingEventRecordingNotes":{
+# 		"tag":"500",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"prefix":"Notes about the original analog recording: "
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingEventTitle":{
+# 		"tag":"500",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"prefix":"Title of event: "
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingLocation":{
+# 		"tag":"500",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"prefix":"Location of recording: "
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingPermissions":{
+# 		"tag":"540",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value"
+# 			},
+# 			{
+# 				"c":"Speaker release form."
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"recordingTapeNumber":{
+# 		"tag":"500",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"prefix":"Original audiocassette tape number: "
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"FilmTitle":{
+# 		"tag":"630",
+# 		"instructions":"Parsed specifically in its own function",
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"suffix":"(Motion Piction)"
+# 			}
+# 		],
+# 		"ind1":"\\",
+# 		"ind2":"4"
+# 	},
+# 	"Speaker":{
+# 		"tag":"700",
+# 		"instructions":"Parsed specifically in its own function",
+# 		"subfields":[
+# 			{
+# 				"a":"value",
+# 				"suffix":", "
+# 			},
+# 			{
+# 				"e":"speaker"
+# 			}
+# 		],
+# 		"ind1":"1",
+# 		"ind2":"\\"
+# 	},
+# 	"duration":{
+# 		"tag":"306",
+# 		"instructions":"rawduration",
+# 		"subfields":[],
+# 		"ind1":"\\",
+# 		"ind2":"\\"
+# 	},
+# 	"url":{
+# 		"tag":"856",
+# 		"instructions":None,
+# 		"subfields":[
+# 			{
+# 				"z":"View item on Internet Archive"
+# 			},
+# 			{
+# 				"u":"value"
+# 			}
+# 		],
+# 		"ind1":"4",
+# 		"ind2":"0"
+# 	}
+# }
 
 def add_collection_defaults(Record):
 	'''
@@ -173,6 +373,46 @@ def add_collection_defaults(Record):
 	with very similar provenance, so there is a lot that is consistent
 	across records for the entire collectoin.
 	'''
+	### 040
+	ohFourOh = fields.DataField('040','\\','\\')
+	for x in [
+		fields.Subfield(
+			'a',
+			'CUY'
+			),
+		fields.Subfield(
+			'b',
+			'eng'
+			),
+		fields.Subfield(
+			'e',
+			'rda'
+			),
+		fields.Subfield(
+			'c',
+			'CUY'
+			)
+		]:
+		ohFourOh.subfields.append(x)
+
+	Record.dataFields.append(ohFourOh)
+
+	### 110
+	corpAuthor = fields.DataField('110','2','\\')
+	for x in [
+		fields.Subfield(
+			'a',
+			'Top Value Television (Production company), '
+			),
+		fields.Subfield(
+			'e',
+			'production company.'
+			)
+		]:
+		corpAuthor.subfields.append(x)
+
+	Record.dataFields.append(corpAuthor)
+
 	### 264
 	publication = fields.DataField('264','\\','1')
 	for x in [
@@ -193,7 +433,26 @@ def add_collection_defaults(Record):
 
 	Record.dataFields.append(publication)
 
+	### 300
+	physical = fields.DataField('300','\\','\\')
+	for x in [
+		fields.Subfield('a','1 online resource')
+		]:
+		physical.subfields.append(x)
+
+	Record.dataFields.append(physical)
+
 	### 336
+	contentType = fields.DataField('336','\\','\\')
+	for x in [
+		fields.Subfield('a','two-dimensional moving image'),
+		fields.Subfield('b','tdi'),
+		fields.Subfield('2','rdacontent')
+		]:
+		contentType.subfields.append(x)
+
+	Record.dataFields.append(contentType)
+
 	### 337
 	media = fields.DataField('337','\\','\\')
 	for x in [
@@ -239,7 +498,7 @@ def add_collection_defaults(Record):
 	### 347 file type
 	fType = fields.DataField('347','\\','\\')
 	for x in [
-		fields.Subfield('a','audio file'),
+		fields.Subfield('a','video file'),
 		fields.Subfield('2','rdaft')
 		]:
 		fType.subfields.append(x)
@@ -247,22 +506,23 @@ def add_collection_defaults(Record):
 	Record.dataFields.append(fType)
 
 	### 347 bitrate
-	bitrate = fields.DataField('347','\\','\\')
-	bitrate.subfields.append(
-		fields.Subfield('f','variable bit rate 190-250 kbit/s')
-		)
+	# bitrate = fields.DataField('347','\\','\\')
+	# bitrate.subfields.append(
+	# 	fields.Subfield('f','variable bit rate 190-250 kbit/s')
+	# 	)
 
-	Record.dataFields.append(bitrate)
+	# Record.dataFields.append(bitrate)
 
 	### 500 general pfa note
 	pfanote = fields.DataField('500','\\','\\')
 	pfanote.subfields.append(
 		fields.Subfield(
 			'a',
-			("Part of the Pacific Film Archive theater guest "
-			"recording collection.... yadda yadda"
-			"digitized from audiocassette in 2019 by MediaPreserve "
-			"as part of a CLIR Recordings at Risk grant project")
+			("From the Top Value Television (TVTV) collection "
+			"at UC Berkeley Art Museum and Pacific Film Archive. "
+			"Digitized from open reel videotape in 2019 "
+			"as part of a National Endowment for the Humanities "
+			"Collections and Reference Resources grant project.")
 			)
 		)
 	Record.dataFields.append(pfanote)
@@ -270,7 +530,7 @@ def add_collection_defaults(Record):
 	### 542 copyright
 	copyright = fields.DataField('542','\\','\\')
 	copyright.subfields.append(
-		fields.Subfield('a','Boilerplate copyright statement TBD')
+		fields.Subfield('a','All materials copyright TVTV.')
 		)
 	Record.dataFields.append(copyright)
 
@@ -278,8 +538,8 @@ def add_collection_defaults(Record):
 	funding = fields.DataField('536','\\','\\')
 	funding.subfields.append(
 		fields.Subfield('a',
-		('Digitization sponsored by a grant from the '
-		'Council on Library and Information Resources')
+		('Digitization made possible in part by funding from '
+		'The National Endowment for the Humanities.')
 		)
 		)
 	Record.dataFields.append(funding)
@@ -287,30 +547,68 @@ def add_collection_defaults(Record):
 	### 530 additional physical form
 	addForm = fields.DataField('530','\\','\\')
 	for x in [
-		fields.Subfield('a','Originally recorded on audio cassette.'),
-		fields.Subfield('c','Access to original tape may be restricted.')
+		fields.Subfield('a','Originally recorded on EIAJ 1/2" open-reel videotape.'),
+		fields.Subfield('c','Access to original tape is restricted.')
 		]:
 		addForm.subfields.append(x)
 
 	Record.dataFields.append(addForm)
 
+	### 650 one subject?
+	subject = fields.DataField('651','\\','0')
+	for x in [
+		fields.Subfield('a','United States'),
+		fields.Subfield('x','Politics and government'),
+		fields.Subfield('y','1972-1974')
+		]:
+		subject.subfields.append(x)
+
+	Record.dataFields.append(subject)
+
 	### 710 BAMPFA
 	bampfa = fields.DataField('710','2','\\')
 	for x in [
 		fields.Subfield('a','UC Berkeley Art Museum and Pacific Film Archive, '),
-		fields.Subfield('e','host institution')
+		fields.Subfield('e','conservator')
 		]:
 		bampfa.subfields.append(x)
 	Record.dataFields.append(bampfa)
 
-	### 710 CLIR
+	### 710 NEH
 	clir = fields.DataField('710','2','\\')
 	for x in [
-		fields.Subfield('a','CLIR, '),
-		fields.Subfield('e','sponsoring body')
+		fields.Subfield('a','National Endowment for the Humanities, '),
+		fields.Subfield('e','sponsor')
 		]:
 		clir.subfields.append(x)
 	Record.dataFields.append(clir)
+
+	### 949 wb
+	web = fields.DataField('949','\\','1')
+	for x in [
+		fields.Subfield('l','wb')
+		]:
+		web.subfields.append(x)
+	Record.dataFields.append(web)
+
+	### 956 stats field
+	stats = fields.DataField('956','\\','\\')
+	for x in [
+		fields.Subfield('a','20200901'),
+		fields.Subfield('b','pfmcq'),
+		fields.Subfield('c','CO')
+		]:
+		stats.subfields.append(x)
+	Record.dataFields.append(stats)
+
+	# ### 710 CLIR
+	# clir = fields.DataField('710','2','\\')
+	# for x in [
+	# 	fields.Subfield('a','CLIR, '),
+	# 	fields.Subfield('e','sponsoring body')
+	# 	]:
+	# 	clir.subfields.append(x)
+	# Record.dataFields.append(clir)
 
 
 ###########################
@@ -319,6 +617,59 @@ def add_collection_defaults(Record):
 ###### THEY CORRESPOND TO THE customProperties DICT
 ###### DEFINED IN THE `RECORD` CLASS
 ###### AND ALSO WE PARSE THE MARCmapper DICT ABOVE
+
+def set_nonfiling_indicator(Record):
+	title = None
+	nonfiling = None
+	for dataField in Record.dataFields:
+		if dataField.tag == '245':
+			titleField = dataField
+			for subfield in dataField.subfields:
+				if subfield.subfieldCharacter == 'a':
+					title = subfield.value
+
+	if title:
+		if title.lower().startswith("the "):
+			nonfiling = '4'
+		elif title.lower().startswith("an "):
+			nonfiling = '3'
+		elif title.lower().startswith("a "):
+			nonfiling = '2'
+
+	if nonfiling:
+		for dataField in Record.dataFields:
+			if dataField.tag == '245':
+				dataField.ind2 = nonfiling
+
+	# return nonfiling
+
+def set_duration(Record):
+	duration = None
+	if 'duration' in Record.fieldedData:
+		duration = Record.fieldedData['duration']
+		print(duration)
+		for dataField in Record.dataFields:
+			if dataField.tag == '300':
+				for subfield in dataField.subfields:
+					if subfield.subfieldCharacter == 'a':
+						subfield.value = "{} ({})".format(subfield.value,duration)
+						# print(subfield.value)
+		hhmmss = duration.replace(":","")
+		print(hhmmss)
+		if len(hhmmss) < 6:
+			hhmmss = hhmmss.zfill(6)
+		threeOhSix = fields.DataField("306","\\","\\")
+		threeOhSix.subfields.append(fields.Subfield('a',hhmmss))
+
+
+		Record.dataFields.append(threeOhSix)
+
+
+
+
+# def parse_ohOhEight_Dates(Record):
+# 	year = Record.fieldedData['year']
+
 
 def parse_speaker_names(Record):
 	namesLNFN = Record.fieldedData['lnfn'].split('|')
@@ -410,18 +761,21 @@ def parse_duration(Record):
 		# leave duration = None
 		pass
 	if Record.customProperties['duration']:
-		# parse it to seconds 
+		# parse it to seconds
 		# parse that to HHMMSS
 		# and put it in 306
 		# and also customProp['time']
 		# and also 300 $a
 		pass
 
-def set_ohOhSeven(Record):
+def set_ohOhSeven(Record,config):
 	'''
-	THESE VALUES ARE SET FOR OUR PARTICULAR COLLECTION.
+	THESE VALUES ARE MOSTLY SET FOR THE PARTICULAR COLLECTION
+	IN CONFIG.INI WITH ADD'L VALUES BASED ON RECORD SPECIFICS
 	'''
-	formatDict = {}
+	formatDict = ast.literal_eval(config['ohOhSeven']['ohOhSeven'])
+	# channels = Record.customProperties['']
+
 	if Record.customProperties['format'] == "REC":
 		'''
 		This is a collection of streaming digital audio
@@ -438,29 +792,32 @@ def set_ohOhSeven(Record):
 		else:
 			e = "\\"
 
-		formatDict['a'] = "s"	# Category of material = sound recording
-		formatDict['b'] = "z"	# Specific material designation = other
-		formatDict['d'] = "\\"	# Speed = not coded
-		formatDict['e'] = e 	# Channel config set by Record.MonoStereo
-		formatDict['f'] = "n"	# Groove = n/a
-		formatDict['g'] = "n"	# Dimensions = n/a
-		formatDict['h'] = "n"	# Tape width = n/a
-		formatDict['i'] = "n"	# Tape config  = n/a
-		formatDict['j'] = "n"	# Kind of disc/etc = n/a
-		formatDict['k'] = "n"	# Kind of mat'l = n/a
-		formatDict['l'] = "n"	# Kind of cutting = n/a
-		formatDict['m'] = "e"	# Special playback chars = digital recording
-		formatDict['n'] = "z"	# Capture/Storage tech. = Other
-	
+		formatDict['e'] = e
+
+	elif Record.customProperties['format'] == 'COM':
+		# TVTV streaming files
+		channels = Record.customProperties['MonoStereo']
+		if (channels and channels == "unknown"):
+			f = "u"
+		elif (channels and channels in ["mono","stereo"]):
+			f = "a"
+		else:
+			f = "u"
+
+		formatDict['f'] = f
+
+	else:
+		return ''
+
 	ohOhSevenObject = fields.OhOhSeven(
 		**formatDict
 		)
-	return ohOhSevenObject.data
+	return ohOhSevenObject.data.replace("\\","").replace("||","\\") # sleight of hand to account for empty $c
 
 def main(Record):
 	parse_stereo_mono(Record)
-	parse_recording_date(Record)
-	parse_speaker_names(Record)
-	parse_film_title_subjects(Record)
-	parse_duration(Record)
+	# parse_recording_date(Record)
+	# parse_speaker_names(Record)
+	# parse_film_title_subjects(Record)
+	# parse_duration(Record)
 	add_collection_defaults(Record)
