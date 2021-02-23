@@ -4,19 +4,19 @@ from datetime import datetime
 import fields
 
 '''
-This file has stuff that is used to map data that is specific to our 
+This file has stuff that is used to map data that is specific to our
 particular instance. So:
 * MARCmapper is a dict that maps the data coming
   in from our source CSV.
 * add_collection_defaults() adds fields to each record that will be consistent
   across this entire collection
-* Then there's a set of functions designed to add fields that parse out 
+* Then there's a set of functions designed to add fields that parse out
   some of our specific data, namely:
   * speaker names (that go to 245 and 700)
   * film titles as subjects (that go to 630)
-  * date of recording 
+  * date of recording
 
-Some of that specific data is added to properties of the `Record` class in a 
+Some of that specific data is added to properties of the `Record` class in a
 `customProperties` dict.
 Maybe this could be set in a config file if this were to be more broadly applicable?
 '''
@@ -97,8 +97,8 @@ MARCmapper = {
 				"prefix":"cbpf_"
 			}
 		],
-		"ind1":"0",
-		"ind2":"0"
+		"ind1":"\\",
+		"ind2":"\\"
 	},
 	"genreForm":{
 		"tag":"655",
@@ -397,7 +397,7 @@ def add_collection_defaults(Record):
 
 	Record.dataFields.append(ohFourOh)
 
-	### 110 
+	### 110
 	corpAuthor = fields.DataField('110','2','\\')
 	for x in [
 		fields.Subfield(
@@ -667,8 +667,8 @@ def set_duration(Record):
 
 
 
-def parse_ohOhEight_Dates(Record):
-	year = Record.fieldedData['year']
+# def parse_ohOhEight_Dates(Record):
+# 	year = Record.fieldedData['year']
 
 
 def parse_speaker_names(Record):
@@ -761,7 +761,7 @@ def parse_duration(Record):
 		# leave duration = None
 		pass
 	if Record.customProperties['duration']:
-		# parse it to seconds 
+		# parse it to seconds
 		# parse that to HHMMSS
 		# and put it in 306
 		# and also customProp['time']
@@ -771,7 +771,7 @@ def parse_duration(Record):
 def set_ohOhSeven(Record,config):
 	'''
 	THESE VALUES ARE MOSTLY SET FOR THE PARTICULAR COLLECTION
-	IN CONFIG.INI WITH ADD'L VALUES BASED ON RECORD SPECIFICS 
+	IN CONFIG.INI WITH ADD'L VALUES BASED ON RECORD SPECIFICS
 	'''
 	formatDict = ast.literal_eval(config['ohOhSeven']['ohOhSeven'])
 	# channels = Record.customProperties['']
@@ -792,7 +792,7 @@ def set_ohOhSeven(Record,config):
 		else:
 			e = "\\"
 
-		formatDict['e'] = e	
+		formatDict['e'] = e
 
 	elif Record.customProperties['format'] == 'COM':
 		# TVTV streaming files
@@ -807,12 +807,12 @@ def set_ohOhSeven(Record,config):
 		formatDict['f'] = f
 
 	else:
-		return '' 
-	
+		return ''
+
 	ohOhSevenObject = fields.OhOhSeven(
 		**formatDict
 		)
-	return ohOhSevenObject.data
+	return ohOhSevenObject.data.replace("\\","").replace("||","\\") # sleight of hand to account for empty $c
 
 def main(Record):
 	parse_stereo_mono(Record)

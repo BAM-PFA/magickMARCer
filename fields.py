@@ -70,7 +70,7 @@ class OhOhSeven:
 	def __init__(self,
 		a="\\",
 		b="\\",
-		c="\\",
+		c="||", # annoyingly, $c doesn't exist in 007 but you still have to leave an empty space for where it would go
 		d="\\",
 		e="\\",
 		f="\\",
@@ -408,5 +408,3 @@ class ItemBytes:
 			return bytes
 		else:
 			return False
-
-

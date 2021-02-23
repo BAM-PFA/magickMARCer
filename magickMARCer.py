@@ -63,7 +63,7 @@ class Record:
 		temp['fields'] = sorted(temp['fields'], key= lambda t: list(t.keys())[0])
 
 		self.asJSON = temp
-		
+
 class Collection:
 	'''
 	Just a list of Record objects
@@ -105,7 +105,7 @@ def set_fixed_field(Record,config):
 	'''
 	BASED ON THE CUSTOM STUFF SET IN RECORD.customProperties,
 	CREATE LDR AND 008 FIELDS.
-	ALSO, PARSE AN 007 FROM THE 'FORMAT' PROPERTY AND THE 
+	ALSO, PARSE AN 007 FROM THE 'FORMAT' PROPERTY AND THE
 	CUSTOM VALUES IN MARCmapper.set_ohOhSeven()
 	'''
 	ffBytes = fields.ItemBytes(
@@ -121,12 +121,12 @@ def set_fixed_field(Record,config):
 		Time=Record.customProperties['Time'],
 		Type=Record.customProperties['Type']
 		)
-	if 'year' in Record.fieldedData:
+	if Record.fieldedData['year'] not in (""," "):
 		year = Record.fieldedData['year']
 		# print(re.sub("(.+)(\\\\\\\\)$","\1"+year,ffBytes.Dates))
-		ffBytes.Dates = re.sub(r"(.*)(\\\\\\\\)$",r"\1_"+year,ffBytes.Dates)
+		ffBytes.Dates = re.sub(r"(.*)(19uu)$",r"\1_"+year,ffBytes.Dates)
 		ffBytes.Dates = ffBytes.Dates.replace("_","")
-		print(ffBytes.Dates)
+		# print(ffBytes.Dates)
 
 	ffBytes.set_008_bytes()
 	if ffBytes:
